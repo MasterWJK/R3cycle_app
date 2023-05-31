@@ -155,9 +155,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   // First child in the stack, the background image
                   Container(
                     decoration: BoxDecoration(
+                      //darken the image
                       image: const DecorationImage(
                         image: AssetImage('assets/images/IU_2023.jpg'),
                         fit: BoxFit.cover,
+                        colorFilter:
+                            ColorFilter.mode(Colors.black54, BlendMode.darken),
                       ),
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -169,16 +172,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     bottom: 20,
                     child: Container(
                       width: 80,
+                      padding: const EdgeInsets.all(10),
                       decoration: const BoxDecoration(
-                        image: DecorationImage(
-                          image:
-                              AssetImage('assets/images/New_Balance_logo.png'),
-                          fit: BoxFit.contain,
-                        ),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(10),
-                          bottomLeft: Radius.circular(10),
-                        ),
+                        // add background color and a border
+                        color: Colors.white,
+
+                        borderRadius: BorderRadius.all(Radius.circular(7)),
+                      ),
+                      // add image as child
+                      child: Image.asset(
+                        'assets/images/New_Balance_logo.png',
+                        fit: BoxFit.contain,
                       ),
                     ),
                   ),
@@ -201,7 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           style: TextStyle(
                             color: Colors.white, // text color
                             fontSize: 12, // text size
-                            fontWeight: FontWeight.w600, // text weight
+                            fontWeight: FontWeight.w800, // text weight
                           ),
                         ),
                       ),
