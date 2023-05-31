@@ -138,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
         },
       ),
       child: ListView.builder(
-        itemCount: 5,
+        itemCount: 3,
         itemBuilder: (BuildContext context, int index) {
           return // create container with indentation on each side and a height of 100
               Container(
@@ -204,8 +204,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           'New Balance - 10% Coupon', // replace with your text
                           style: TextStyle(
                             color: Colors.white, // text color
-                            fontSize: 12, // text size
-                            fontWeight: FontWeight.w800, // text weight
+                            fontSize: 13,
+                            fontFamily: 'Inter', // text size
+                            fontWeight: FontWeight.w700, // text weight
                           ),
                         ),
                       ),

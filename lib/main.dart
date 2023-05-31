@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:r3cycle_app/home/top_bar.dart';
 import 'package:r3cycle_app/home_screen.dart';
+import 'package:r3cycle_app/scan_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,9 +19,7 @@ class MyApp extends StatelessWidget {
         // This is the theme of your application. Try running your application
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
-        // textTheme: GoogleFonts.interTextTheme(
-        //   Theme.of(context).textTheme,
-        // ),
+        fontFamily: 'Inter',
       ),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
       //remove debug banner
@@ -76,6 +75,28 @@ class _MyHomePageState extends State<MyHomePage> {
                               onTap: () {
                                 // This function will be called when the user taps the scan button.
                                 // (navigate to the scan screen)
+                                // navigate to ScanScreen using cupertinoPageRoute
+                                Navigator.push(
+                                  context,
+                                  PageRouteBuilder(
+                                    transitionDuration:
+                                        const Duration(milliseconds: 200),
+                                    pageBuilder: (_, __, ___) => ScanScreen(),
+                                    transitionsBuilder:
+                                        (_, animation, __, child) {
+                                      return SlideTransition(
+                                        position: Tween<Offset>(
+                                          begin: const Offset(0, 1),
+                                          end: Offset.zero,
+                                        ).animate(CurvedAnimation(
+                                          parent: animation,
+                                          curve: Curves.easeOut,
+                                        )),
+                                        child: child,
+                                      );
+                                    },
+                                  ),
+                                );
                               },
                               child: Container(
                                 height: 54, // Sets the height of the button.
@@ -97,6 +118,15 @@ class _MyHomePageState extends State<MyHomePage> {
                                     begin: const Alignment(-1.0, -2.0),
                                     end: const Alignment(1.0, 2.0),
                                   ),
+                                  boxShadow: [
+                                    // Adds a shadow effect to the button.
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      spreadRadius: 1,
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
                                 ),
                                 child: const Row(
                                   // Contains a row of widgets (icon and text).
@@ -115,7 +145,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                       "Scan",
                                       style: TextStyle(
                                         fontSize: 14,
-                                        fontWeight: FontWeight.w600,
+                                        fontWeight: FontWeight.w700,
                                         color: Colors.white,
                                       ),
                                     ),
