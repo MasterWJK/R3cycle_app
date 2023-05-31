@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:r3cycle_app/tag_config_screen.dart';
 
 class ScanScreen extends StatefulWidget {
   @override
@@ -231,22 +232,11 @@ class _ScanScreenState extends State<ScanScreen> {
 
   void _processQRCode(String code) {
     // Handle the scanned QR code data here
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('QR Code Scanned'),
-          content: Text(code),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TagConfigScreen(qrCode: code),
+      ),
     );
   }
 }
