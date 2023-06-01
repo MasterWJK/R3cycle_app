@@ -64,27 +64,6 @@ class _ScanScreenState extends State<ScanScreen> {
                               // This function will be called when the user taps the scan button.
                               // (navigate to the scan screen)
                               // navigate to ScanScreen using cupertinoPageRoute
-                              Navigator.push(
-                                context,
-                                PageRouteBuilder(
-                                  transitionDuration:
-                                      const Duration(milliseconds: 200),
-                                  pageBuilder: (_, __, ___) => ScanScreen(),
-                                  transitionsBuilder:
-                                      (_, animation, __, child) {
-                                    return SlideTransition(
-                                      position: Tween<Offset>(
-                                        begin: const Offset(0, 1),
-                                        end: Offset.zero,
-                                      ).animate(CurvedAnimation(
-                                        parent: animation,
-                                        curve: Curves.easeOut,
-                                      )),
-                                      child: child,
-                                    );
-                                  },
-                                ),
-                              );
                             },
                             child: Container(
                               height: 54, // Sets the height of the button.
@@ -230,14 +209,23 @@ class _ScanScreenState extends State<ScanScreen> {
     });
   }
 
+  bool _isScanning = false;
+
   void _processQRCode(String code) {
-    // Handle the scanned QR code data here
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => TagConfigScreen(qrCode: code),
-      ),
-    );
+    if (!_isScanning) {
+      _isScanning = true;
+      controller!.pauseCamera();
+      Navigator.of(context)
+          .push(
+        MaterialPageRoute(
+          builder: (context) => TagConfigScreen(qrCode: code),
+        ),
+      )
+          .then((_) {
+        _isScanning = false;
+        controller!.resumeCamera();
+      });
+    }
   }
 }
 
