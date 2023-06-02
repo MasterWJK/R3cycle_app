@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:r3cycle_app/home/top_bar.dart';
 import 'package:r3cycle_app/home_screen.dart';
+import 'package:r3cycle_app/map_screen.dart';
 import 'package:r3cycle_app/scan_screen.dart';
 
 void main() {
@@ -163,8 +164,27 @@ class _MyHomePageState extends State<MyHomePage> {
                             ),
                             GestureDetector(
                               onTap: () {
-                                // This function will be called when the user taps the map button.
-                                // (navigate to the map screen)
+                                Navigator.push(
+                                  context,
+                                  PageRouteBuilder(
+                                    transitionDuration:
+                                        const Duration(milliseconds: 200),
+                                    pageBuilder: (_, __, ___) => MapScreen(),
+                                    transitionsBuilder:
+                                        (_, animation, __, child) {
+                                      return SlideTransition(
+                                        position: Tween<Offset>(
+                                          begin: const Offset(0, 1),
+                                          end: Offset.zero,
+                                        ).animate(CurvedAnimation(
+                                          parent: animation,
+                                          curve: Curves.easeOut,
+                                        )),
+                                        child: child,
+                                      );
+                                    },
+                                  ),
+                                );
                               },
                               child: Container(
                                 height: 54, // Sets the height of the button.

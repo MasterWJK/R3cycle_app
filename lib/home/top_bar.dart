@@ -59,8 +59,7 @@ class TopBar extends StatelessWidget {
                     style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
-                        letterSpacing: -0.02 // Make the text bold
-                        ),
+                        letterSpacing: -0.02),
                   ),
                 ],
               ),
