@@ -36,8 +36,8 @@ class TopBar extends StatelessWidget {
               width: 100,
             ),
             Container(
-              height: 54, // Adjust the height according to your needs
-              width: 100,
+              height: 44, // Adjust the height according to your needs
+              padding: EdgeInsets.symmetric(horizontal: 20),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(27),
                 color: const Color(0xFFF3F3F3),
@@ -48,16 +48,19 @@ class TopBar extends StatelessWidget {
                 children: [
                   SvgPicture.asset(
                     'assets/images/coin.svg',
-                    height: 24, // Adjust the size according to your needs
+                    height: 20, // Adjust the size according to your needs
                     fit: BoxFit
                         .contain, // It's recommended to use BoxFit.contain for SVGs to prevent distortion
                   ),
+                  SizedBox(
+                      width: 4), // Add some space between the icon and text
                   const Text(
                     '80',
                     style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold, // Make the text bold
-                    ),
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: -0.02 // Make the text bold
+                        ),
                   ),
                 ],
               ),
@@ -71,15 +74,15 @@ class TopBar extends StatelessWidget {
                 );
               },
               child: Container(
-                height: 38,
-                width: 38,
+                height: 44,
+                width: 44,
                 foregroundDecoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(100),
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(100),
                   child: Image.asset(
-                    'assets/images/rec_profile_pic.png',
+                    'assets/images/IU_2023.jpg',
                     fit: BoxFit.cover,
                   ),
                 ),

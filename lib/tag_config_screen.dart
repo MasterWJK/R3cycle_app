@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:r3cycle_app/tag_finish_screen.dart';
 
 class TagConfigScreen extends StatefulWidget {
   final String qrCode;
@@ -19,6 +21,7 @@ class _TagConfigScreenState extends State<TagConfigScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
@@ -127,29 +130,28 @@ class _TagConfigScreenState extends State<TagConfigScreen> {
                       child: GestureDetector(
                         // 'GestureDetector' widget is used to detect tap events.
                         onTap: () {
-                          // This function will be called when the user taps the scan button.
-                          // (navigate to the scan screen)
-                          // navigate to ScanScreen using cupertinoPageRoute
-                          // Navigator.push(
-                          //   context,
-                          //   PageRouteBuilder(
-                          //     transitionDuration:
-                          //         const Duration(milliseconds: 200),
-                          //     pageBuilder: (_, __, ___) => ScanScreen(),
-                          //     transitionsBuilder: (_, animation, __, child) {
-                          //       return SlideTransition(
-                          //         position: Tween<Offset>(
-                          //           begin: const Offset(0, 1),
-                          //           end: Offset.zero,
-                          //         ).animate(CurvedAnimation(
-                          //           parent: animation,
-                          //           curve: Curves.easeOut,
-                          //         )),
-                          //         child: child,
-                          //       );
-                          //     },
-                          //   ),
-                          // );
+                          Navigator.push(
+                            context,
+                            PageRouteBuilder(
+                              transitionDuration:
+                                  const Duration(milliseconds: 200),
+                              pageBuilder: (_, __, ___) => TagFinishScreen(
+                                qrCode: widget.qrCode,
+                              ),
+                              transitionsBuilder: (_, animation, __, child) {
+                                return SlideTransition(
+                                  position: Tween<Offset>(
+                                    begin: const Offset(1, 0),
+                                    end: Offset.zero,
+                                  ).animate(CurvedAnimation(
+                                    parent: animation,
+                                    curve: Curves.easeOut,
+                                  )),
+                                  child: child,
+                                );
+                              },
+                            ),
+                          );
                         },
                         child: Container(
                           height: 54, // Sets the height of the button.
@@ -193,6 +195,7 @@ class _TagConfigScreenState extends State<TagConfigScreen> {
                                   fontSize: 14,
                                   fontWeight: FontWeight.w700,
                                   color: Colors.white,
+                                  letterSpacing: -0.02,
                                 ),
                               ),
                             ],
@@ -237,6 +240,7 @@ class _TagConfigScreenState extends State<TagConfigScreen> {
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
                             color: Colors.grey[700],
+                            letterSpacing: -0.02,
                           ),
                         ),
                       ),
@@ -294,6 +298,7 @@ class QualityRadioButton extends StatelessWidget {
                 title,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
+                  letterSpacing: -0.02,
                   fontSize: 14,
                   color: isSelected
                       ? const Color(0xFF054F46)
@@ -315,6 +320,7 @@ class QualityRadioButton extends StatelessWidget {
                     fontWeight: FontWeight.w800,
                     fontSize: 14,
                     color: Colors.white,
+                    letterSpacing: -0.02,
                   ),
                 ),
               ),
@@ -330,6 +336,7 @@ class QualityRadioButton extends StatelessWidget {
             subtitle,
             style: TextStyle(
               fontSize: 12,
+              letterSpacing: -0.02,
               color: isSelected
                   ? const Color(0xFF054F46)
                   : const Color(0xFF707070),

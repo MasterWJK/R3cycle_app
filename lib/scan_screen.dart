@@ -98,6 +98,7 @@ class _ScanScreenState extends State<ScanScreen> {
                                       fontSize: 14,
                                       fontWeight: FontWeight.w700,
                                       color: Colors.white,
+                                      letterSpacing: -0.02,
                                     ),
                                   ),
                                 ],
@@ -180,6 +181,7 @@ class _ScanScreenState extends State<ScanScreen> {
                             color: Colors.white,
                             fontSize: 16,
                             fontWeight: FontWeight.normal,
+                            letterSpacing: -0.02,
                           ),
                         ),
                         SizedBox(

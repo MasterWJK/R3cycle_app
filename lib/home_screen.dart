@@ -206,7 +206,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             color: Colors.white, // text color
                             fontSize: 13,
                             fontFamily: 'Inter', // text size
-                            fontWeight: FontWeight.w700, // text weight
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.02, // text weight
                           ),
                         ),
                       ),
