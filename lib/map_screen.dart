@@ -3,70 +3,195 @@ import 'package:flutter_map/plugin_api.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:csv/csv.dart';
 import 'package:proj4dart/proj4dart.dart' as proj4;
+import 'package:geolocator/geolocator.dart';
+import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
+import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
+import 'package:vector_math/vector_math.dart' show radians;
 import 'dart:convert';
 
 import 'package:url_launcher/url_launcher.dart';
 
-class MapScreen extends StatelessWidget {
+class MapScreen extends StatefulWidget {
   @override
+  _MapScreenState createState() => _MapScreenState();
+}
+
+class _MapScreenState extends State<MapScreen> {
+  LatLng _currentLocation = LatLng(0, 0); // Default location
+
+  static const styleUrl =
+      "https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}@2x.png";
+  static const apiKey = "c4fea2da-4a39-4b31-8ab8-736e60c3dc2c";
+
+  @override
+  void initState() {
+    super.initState();
+    getCurrentLocation();
+  }
+
+  Future<void> getCurrentLocation() async {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        // Location services are not enabled don't continue
+        // accessing the position and request users of the
+        // App to enable the location services.
+        return Future.error('Location services are disabled.');
+      } else
+        print('Location services are enabled.');
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          // Permissions are denied, next time you could try
+          // requesting permissions again (this is also where
+          // Android's shouldShowRequestPermissionRationale
+          // returned true. According to Android guidelines
+          // your App should show an explanatory UI now.
+          return Future.error('Location permissions are denied');
+        }
+      }
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+      print(position.heading);
+      print(position.latitude);
+      setState(() {
+        _currentLocation = LatLng(position.latitude,
+            position.longitude); // Update the current heading
+      });
+      // setState(() {
+      //   print(position.latitude);
+      //   _currentLocation = LatLng(position.latitude, position.longitude);
+      // });
+    } catch (e) {
+      print('Error getting current location: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('OpenStreetMap'),
-      ),
-      body: FutureBuilder<List<LatLng>>(
-        future: getGeoPointsFromCSV(context),
-        builder: (BuildContext context, AsyncSnapshot<List<LatLng>> snapshot) {
-          if (snapshot.hasData) {
-            List<LatLng> geoPoints = snapshot.data!;
+      body: Stack(
+        children: [
+          FutureBuilder<List<LatLng>>(
+            future: getGeoPointsFromCSV(context),
+            builder:
+                (BuildContext context, AsyncSnapshot<List<LatLng>> snapshot) {
+              if (snapshot.hasData) {
+                List<LatLng> geoPoints = snapshot.data!;
 
-            return FlutterMap(
-              options: MapOptions(
-                center: LatLng(51.509364, -0.128928),
-                zoom: 9.2,
-              ),
-              nonRotatedChildren: [
-                RichAttributionWidget(
-                  attributions: [
-                    TextSourceAttribution(
-                      'OpenStreetMap contributors',
-                      onTap: () => launchUrl(
-                          Uri.parse('https://openstreetmap.org/copyright')),
+                return FlutterMap(
+                  options: MapOptions(
+                    center:
+                        _currentLocation, // Use the current location as the center
+                    zoom: 16,
+                  ),
+                  nonRotatedChildren: [
+                    RichAttributionWidget(
+                      attributions: [
+                        TextSourceAttribution(
+                          'OpenStreetMap contributors',
+                          onTap: () => launchUrl(
+                            Uri.parse('https://openstreetmap.org/copyright'),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
+                  children: [
+                    TileLayer(
+                      // urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                      urlTemplate: "$styleUrl?api_key={api_key}",
+                      additionalOptions: {"api_key": apiKey},
+                      maxZoom: 20,
+                      maxNativeZoom: 20,
+                    ),
+                    MarkerLayer(
+                      markers: [
+                        ...geoPoints.map((LatLng point) {
+                          return Marker(
+                            point: point,
+                            builder: (BuildContext context) {
+                              return Icon(
+                                Icons.location_pin,
+                                color: Colors.red,
+                              );
+                            },
+                          );
+                        }).toList(),
+                      ],
+                    ),
+                    CurrentLocationLayer(
+                      followOnLocationUpdate: FollowOnLocationUpdate.always,
+                      turnOnHeadingUpdate: TurnOnHeadingUpdate.never,
+                      style: const LocationMarkerStyle(
+                        markerSize: Size(20, 20),
+                        markerDirection: MarkerDirection.heading,
+                      ),
+                    ),
+                  ],
+                );
+              } else if (snapshot.hasError) {
+                return Center(
+                  child: Text('Error: ${snapshot.error}'),
+                );
+              } else {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+            },
+          ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: AppBar(
+              backgroundColor: Color(0xFF1C292D).withOpacity(0.6),
+              elevation: 0,
+              leading: IconButton(
+                icon: const Icon(
+                  Icons.arrow_back_rounded, // Material back arrow icon
+                  color: Colors.white,
+                ),
+                onPressed: () {
+                  Navigator.of(context)
+                      .pop(); // Go back when the back arrow is pressed
+                },
+              ),
+              actions: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 16),
+                  child: GestureDetector(
+                    onTap: () {
+                      // Handle "How it works" button press
+                    },
+                    child: const Row(
+                      children: [
+                        Text(
+                          'How it works',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.normal,
+                            letterSpacing: -0.02,
+                          ),
+                        ),
+                        SizedBox(
+                            width: 8), // Add spacing between the text and icon
+                        Icon(
+                          Icons.info_rounded, // Info icon
+                          color: Colors.white,
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
-              children: [
-                TileLayer(
-                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  userAgentPackageName: 'com.example.app',
-                ),
-                MarkerLayer(
-                  markers: geoPoints.map((LatLng point) {
-                    return Marker(
-                      point: point,
-                      builder: (BuildContext context) {
-                        return Icon(
-                          Icons.location_pin,
-                          color: Colors.red,
-                        );
-                      },
-                    );
-                  }).toList(),
-                ),
-              ],
-            );
-          } else if (snapshot.hasError) {
-            return Center(
-              child: Text('Error: ${snapshot.error}'),
-            );
-          } else {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-        },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -110,5 +235,45 @@ class MapScreen extends StatelessWidget {
     }
 
     return geoPoints;
+  }
+
+  Marker _buildUserMarker() {
+    return Marker(
+      width: 40,
+      height: 40,
+      point: _currentLocation,
+      builder: (ctx) => Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            width: 30,
+            height: 30,
+            child: Icon(
+              Icons.circle,
+              color: Colors.blue,
+            ),
+          ),
+          Positioned(
+            top: 14,
+            child: Container(
+              width: 0,
+              height: 0,
+              decoration: BoxDecoration(
+                color: Colors.blue,
+                shape: BoxShape.circle,
+              ),
+              child: Transform.rotate(
+                angle: -radians(90),
+                child: Icon(
+                  Icons.near_me_rounded,
+                  color: Colors.blue,
+                  size: 15,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

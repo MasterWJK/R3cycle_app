@@ -45,6 +45,10 @@ dependencies:
   latlong2: ^0.8.2
   csv: ^5.0.2
   proj4dart: ^2.1.0
+  geolocator: ^9.0.2
+  flutter_map_marker_cluster: ^1.1.1
+  google_maps_flutter: ^2.2.8
+  flutter_map_location_marker: ^6.0.0
  
 
 
