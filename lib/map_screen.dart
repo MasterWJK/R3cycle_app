@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/plugin_api.dart';
+import 'package:http/http.dart';
+import 'package:http/src/base_client.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:csv/csv.dart';
 import 'package:proj4dart/proj4dart.dart' as proj4;
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
+import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:vector_math/vector_math.dart' show radians;
-import 'dart:convert';
 
 import 'package:url_launcher/url_launcher.dart';
 
@@ -19,8 +21,10 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   LatLng _currentLocation = LatLng(0, 0); // Default location
 
+  // static const styleUrl =
+  //     "https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}.png";
   static const styleUrl =
-      "https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}@2x.png";
+      "https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}.png";
   static const apiKey = "c4fea2da-4a39-4b31-8ab8-736e60c3dc2c";
 
   @override
@@ -53,6 +57,7 @@ class _MapScreenState extends State<MapScreen> {
       }
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
+        timeLimit: const Duration(seconds: 20),
       );
       print(position.heading);
       print(position.latitude);
@@ -80,12 +85,13 @@ class _MapScreenState extends State<MapScreen> {
                 (BuildContext context, AsyncSnapshot<List<LatLng>> snapshot) {
               if (snapshot.hasData) {
                 List<LatLng> geoPoints = snapshot.data!;
-
                 return FlutterMap(
                   options: MapOptions(
                     center:
                         _currentLocation, // Use the current location as the center
                     zoom: 16,
+                    interactiveFlags:
+                        InteractiveFlag.pinchZoom | InteractiveFlag.drag,
                   ),
                   nonRotatedChildren: [
                     RichAttributionWidget(
@@ -100,36 +106,105 @@ class _MapScreenState extends State<MapScreen> {
                     ),
                   ],
                   children: [
+                    // TileLayer(
+                    //   urlTemplate:
+                    //       "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                    //   maxZoom: 20,
+                    //   maxNativeZoom: 20,
+                    // ),
+
                     TileLayer(
-                      // urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
                       urlTemplate: "$styleUrl?api_key={api_key}",
-                      additionalOptions: {"api_key": apiKey},
+                      additionalOptions: const {"api_key": apiKey},
                       maxZoom: 20,
                       maxNativeZoom: 20,
+                      tileProvider: FMTC.instance('mapStore').getTileProvider(
+                          // FMTC.instance.settings.defaultTileProviderSettings,
+                          // {},
+                          // HttpClient()..maxConnectionsPerHost = 3,
+                          ),
                     ),
-                    MarkerLayer(
-                      markers: [
-                        ...geoPoints.map((LatLng point) {
+
+                    // MarkerLayer(
+                    //   markers: [
+                    //     ...geoPoints.map((LatLng point) {
+                    //       return Marker(
+                    //         point: point,
+                    //         rotate: true,
+                    //         builder: (BuildContext context) {
+                    //           return Image.asset("assets/pickup.png");
+                    //           // return Icon(
+                    //           //   Icons.location_pin,
+                    //           //   color: Colors.red,
+                    //           // );
+                    //         },
+                    //       );
+                    //     }).toList(),
+                    //   ],
+                    // ),
+                    MarkerClusterLayerWidget(
+                      options: MarkerClusterLayerOptions(
+                        disableClusteringAtZoom: 14,
+                        maxClusterRadius: 120,
+                        size: const Size(40, 40),
+                        anchor: AnchorPos.align(AnchorAlign.center),
+                        fitBoundsOptions: const FitBoundsOptions(
+                          padding: EdgeInsets.all(20),
+                          maxZoom: 20,
+                        ),
+                        markers: geoPoints.map((LatLng point) {
                           return Marker(
+                            width: 38,
+                            height: 38,
                             point: point,
                             builder: (BuildContext context) {
-                              return Icon(
-                                Icons.location_pin,
-                                color: Colors.red,
+                              return Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      blurRadius: 3,
+                                      offset: Offset(0, 1),
+                                    ),
+                                  ],
+                                ),
+                                child:
+                                    Image.asset("assets/pickup_drop_green.png"),
                               );
                             },
                           );
                         }).toList(),
-                      ],
-                    ),
-                    CurrentLocationLayer(
-                      followOnLocationUpdate: FollowOnLocationUpdate.always,
-                      turnOnHeadingUpdate: TurnOnHeadingUpdate.never,
-                      style: const LocationMarkerStyle(
-                        markerSize: Size(20, 20),
-                        markerDirection: MarkerDirection.heading,
+                        builder: (context, markers) {
+                          return Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              color: Color(0xFF054F46),
+                            ),
+                            child: Center(
+                              child: Text(
+                                markers.length.toString(),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ),
+                    CurrentLocationLayer(
+                        followOnLocationUpdate: FollowOnLocationUpdate.always,
+                        turnOnHeadingUpdate: TurnOnHeadingUpdate.never,
+                        style: const LocationMarkerStyle(
+                          markerSize: Size(20, 20),
+                          markerDirection: MarkerDirection.heading,
+                          headingSectorColor: Color(0xFF4185F4),
+                          marker: DefaultLocationMarker(
+                            color: Color(0xFF4185F4),
+                          ),
+                        )),
                   ],
                 );
               } else if (snapshot.hasError) {
@@ -209,71 +284,37 @@ class _MapScreenState extends State<MapScreen> {
     List<LatLng> geoPoints = [];
     for (var row in csvTable) {
       String shape = row[12];
+      String urlAltkleider = row[2]; // Assuming the column index is 5
 
-      // Extract the coordinates from the "shape" column
-      RegExp regex = RegExp(r'POINT \(([-0-9.]+) ([-0-9.]+)\)');
-      Match? match = regex.firstMatch(shape);
-      if (match != null && match.groupCount == 2) {
-        double x =
-            double.tryParse(match.group(1)!)!; // X coordinate in EPSG:25832
-        double y =
-            double.tryParse(match.group(2)!)!; // Y coordinate in EPSG:25832
+      if (urlAltkleider == "awm@muenchen.de") {
+        // Extract the coordinates from the "shape" column
+        RegExp regex = RegExp(r'POINT \(([-0-9.]+) ([-0-9.]+)\)');
+        Match? match = regex.firstMatch(shape);
+        if (match != null && match.groupCount == 2) {
+          double x =
+              double.tryParse(match.group(1)!)!; // X coordinate in EPSG:25832
+          double y =
+              double.tryParse(match.group(2)!)!; // Y coordinate in EPSG:25832
 
-        // Convert coordinates from EPSG:25832 to WGS84 (latitude and longitude)
-        proj4.Projection srcProjection =
-            proj4.Projection.add('EPSG:25832', wfsProjection);
-        proj4.Projection dstProjection = proj4.Projection.get('EPSG:4326')!;
-        proj4.Point point = proj4.Point(x: x, y: y);
-        proj4.Point transformedPoint =
-            srcProjection.transform(dstProjection, point);
-        double lat = transformedPoint.y;
-        double lng = transformedPoint.x;
+          // Convert coordinates from EPSG:25832 to WGS84 (latitude and longitude)
+          proj4.Projection srcProjection;
+          if (proj4.Projection.get('EPSG:25832') == null) {
+            srcProjection = proj4.Projection.add('EPSG:25832', wfsProjection);
+          } else {
+            srcProjection = proj4.Projection.get('EPSG:25832')!;
+          }
+          proj4.Projection dstProjection = proj4.Projection.get('EPSG:4326')!;
+          proj4.Point point = proj4.Point(x: x, y: y);
+          proj4.Point transformedPoint =
+              srcProjection.transform(dstProjection, point);
+          double lat = transformedPoint.y;
+          double lng = transformedPoint.x;
 
-        LatLng latLng = LatLng(lat, lng);
-        geoPoints.add(latLng);
+          LatLng latLng = LatLng(lat, lng);
+          geoPoints.add(latLng);
+        }
       }
     }
-
     return geoPoints;
-  }
-
-  Marker _buildUserMarker() {
-    return Marker(
-      width: 40,
-      height: 40,
-      point: _currentLocation,
-      builder: (ctx) => Stack(
-        alignment: Alignment.center,
-        children: [
-          Container(
-            width: 30,
-            height: 30,
-            child: Icon(
-              Icons.circle,
-              color: Colors.blue,
-            ),
-          ),
-          Positioned(
-            top: 14,
-            child: Container(
-              width: 0,
-              height: 0,
-              decoration: BoxDecoration(
-                color: Colors.blue,
-                shape: BoxShape.circle,
-              ),
-              child: Transform.rotate(
-                angle: -radians(90),
-                child: Icon(
-                  Icons.near_me_rounded,
-                  color: Colors.blue,
-                  size: 15,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

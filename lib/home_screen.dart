@@ -35,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
               "Pull down refresh",
               style: TextStyle(
                 color: Color(0xFFB0B0B0),
+                letterSpacing: -0.02,
               ),
             );
           } else if (mode == RefreshStatus.refreshing) {
@@ -50,6 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
               "Release to refresh",
               style: TextStyle(
                 color: Color(0xFFB0B0B0),
+                letterSpacing: -0.02,
               ),
             );
           } else if (mode == RefreshStatus.completed) {
@@ -57,6 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
               "Refresh completed!",
               style: TextStyle(
                 color: Color(0xFFB0B0B0),
+                letterSpacing: -0.02,
               ),
             );
           }
@@ -156,13 +159,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   Container(
                     decoration: BoxDecoration(
                       //darken the image
-                      image: const DecorationImage(
-                        image: AssetImage('assets/images/IU_2023.jpg'),
+                      image: DecorationImage(
+                        image: AssetImage(rewardList[index].background),
                         fit: BoxFit.cover,
-                        colorFilter:
-                            ColorFilter.mode(Colors.black54, BlendMode.darken),
+                        colorFilter: const ColorFilter.mode(
+                            Colors.black54, BlendMode.darken),
                       ),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(5),
                     ),
                   ),
                   // Second child in the stack, the additional image
@@ -177,11 +180,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         // add background color and a border
                         color: Colors.white,
 
-                        borderRadius: BorderRadius.all(Radius.circular(7)),
+                        borderRadius: BorderRadius.all(Radius.circular(3)),
                       ),
                       // add image as child
                       child: Image.asset(
-                        'assets/images/New_Balance_logo.png',
+                        rewardList[index].logo,
                         fit: BoxFit.contain,
                       ),
                     ),
@@ -192,6 +195,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     top: 15,
                     bottom: 40,
                     child: Container(
+                      padding: EdgeInsets.all(12.0),
                       width: 200, // specify the width of the text section here
                       decoration: const BoxDecoration(
                         borderRadius: BorderRadius.only(
@@ -199,16 +203,14 @@ class _HomeScreenState extends State<HomeScreen> {
                           bottomRight: Radius.circular(10),
                         ),
                       ),
-                      child: const Center(
-                        child: Text(
-                          'New Balance - 10% Coupon', // replace with your text
-                          style: TextStyle(
-                            color: Colors.white, // text color
-                            fontSize: 13,
-                            fontFamily: 'Inter', // text size
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: -0.02, // text weight
-                          ),
+                      child: Text(
+                        '${rewardList[index].brand} - ${rewardList[index].coupon}',
+                        style: const TextStyle(
+                          color: Colors.white, // text color
+                          fontSize: 13,
+                          fontFamily: 'Inter', // text size
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -0.02, // text weight
                         ),
                       ),
                     ),
@@ -233,9 +235,11 @@ class _HomeScreenState extends State<HomeScreen> {
                             .center, // Aligns children at the center
                         children: <Widget>[
                           // First child in the Row, the text
-                          const Text(
-                            '50', // replace with your text
-                            style: TextStyle(
+                          Text(
+                            rewardList[index]
+                                .coins
+                                .toString(), // replace with your text
+                            style: const TextStyle(
                               color: Color(0xFFFFD843), // text color
                               fontSize: 12, // text size
                               fontWeight: FontWeight.bold, // text weight
@@ -260,3 +264,43 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+
+class Reward {
+  final String brand;
+  final String coupon;
+  final int coins;
+  final String logo;
+  final String background;
+
+  Reward({
+    required this.brand,
+    required this.coupon,
+    required this.coins,
+    required this.logo,
+    required this.background,
+  });
+}
+
+List<Reward> rewardList = [
+  Reward(
+    brand: 'New Balance',
+    coupon: '10% Coupon',
+    coins: 50,
+    logo: 'assets/images/New_Balance_logo.png',
+    background: 'assets/images/IU_2023.jpg',
+  ),
+  Reward(
+    brand: 'Vans',
+    coupon: '15% Coupon',
+    coins: 60,
+    logo: 'assets/images/vans_logo.png',
+    background: 'assets/images/vans_background.png',
+  ),
+  Reward(
+    brand: 'Superdry',
+    coupon: '10% Coupon',
+    coins: 40,
+    logo: 'assets/images/superdry_logo.png',
+    background: 'assets/images/superdry_background.png',
+  ),
+];

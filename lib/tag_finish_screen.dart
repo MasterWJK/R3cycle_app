@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:r3cycle_app/main.dart';
+import 'package:r3cycle_app/map_screen.dart';
 
 class TagFinishScreen extends StatefulWidget {
   final String qrCode;
@@ -184,6 +185,30 @@ class _TagFinishScreenState extends State<TagFinishScreen> {
                   onTap: () {
                     // This function will be called when the user taps the map button.
                     // (navigate to the map screen)
+                    // Navigator.pushAndRemoveUntil(
+                    //   context,
+                    //   MaterialPageRoute(builder: (context) => MapScreen()),
+                    //   (route) => route.isFirst,
+                    // );
+                    Navigator.push(
+                      context,
+                      PageRouteBuilder(
+                        transitionDuration: const Duration(milliseconds: 200),
+                        pageBuilder: (_, __, ___) => MapScreen(),
+                        transitionsBuilder: (_, animation, __, child) {
+                          return SlideTransition(
+                            position: Tween<Offset>(
+                              begin: const Offset(0, 1),
+                              end: Offset.zero,
+                            ).animate(CurvedAnimation(
+                              parent: animation,
+                              curve: Curves.easeOut,
+                            )),
+                            child: child,
+                          );
+                        },
+                      ),
+                    );
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(

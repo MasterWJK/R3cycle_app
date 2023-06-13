@@ -25,9 +25,9 @@ class TopBar extends StatelessWidget {
               height: LayoutProvider(context).topBarHeight,
               padding: const EdgeInsets.symmetric(vertical: 2.5),
               child: Padding(
-                padding: const EdgeInsets.only(left: 2.0),
+                padding: EdgeInsets.only(left: 2.0),
                 child: SvgPicture.asset(
-                  'assets/R3_logo.svg',
+                  'assets/R3_logo_new.svg',
                   height: LayoutProvider(context).topBarHeight - 5.0,
                 ),
               ),
@@ -52,7 +52,7 @@ class TopBar extends StatelessWidget {
                     fit: BoxFit
                         .contain, // It's recommended to use BoxFit.contain for SVGs to prevent distortion
                   ),
-                  SizedBox(
+                  const SizedBox(
                       width: 4), // Add some space between the icon and text
                   const Text(
                     '80',
@@ -64,6 +64,7 @@ class TopBar extends StatelessWidget {
                 ],
               ),
             ),
+            const SizedBox(width: 8),
             GestureDetector(
               behavior: HitTestBehavior.translucent,
               onTap: () {
